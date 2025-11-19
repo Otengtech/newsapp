@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react'
 import { NewsGrid } from './components/NewsGrid'
-import { Navigation } from './components/Navigation'
+import Navigation from './components/Navigation'
 import { SearchBar } from './components/SearchBar'
 import { LoadingSpinner } from './components/LoadingSpinner'
 import { FeaturedNews } from './components/FeaturedNews'
 import { NewsTicker } from './components/NewsTicker'
 import { CategoryStats } from './components/CategoryStats'
-import { ThemeToggle } from './components/ThemeToggle'
 
 const SUBREDDITS = {
   world: { name: 'World News', color: 'bg-blue-50', border: 'border-blue-200', dark: 'dark:bg-blue-900/20' },
@@ -94,19 +93,11 @@ function App() {
                 <h1 className="text-2xl font-bold text-primary-600 dark:text-primary-400">GlobalNews</h1>
                 <span className="ml-2 text-xs bg-primary-100 dark:bg-primary-900 text-primary-800 dark:text-primary-200 px-2 py-1 rounded-full">Live</span>
               </div>
-              
-              <button
-                onClick={handleRefresh}
-                disabled={refreshing}
-                className="flex items-center space-x-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 px-3 py-2 rounded-lg transition-colors text-sm disabled:opacity-50"
-              >
-                <span>{refreshing ? 'Refreshing...' : 'Refresh'}</span>
-              </button>
             </div>
 
             <div className="flex items-center space-x-4">
               <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
-              <ThemeToggle />
+              
             </div>
           </div>
         </div>
@@ -191,45 +182,96 @@ function App() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-gray-900 dark:bg-gray-800 text-white py-8 border-t dark:border-gray-700">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div className="md:col-span-2">
-              <h3 className="text-lg font-bold mb-4">GlobalNews</h3>
-              <p className="text-gray-400">
-                Your trusted source for real-time news from around the world. 
-                Powered by Reddit communities and updated continuously.
-              </p>
-            </div>
-            
-            <div>
-              <h4 className="font-semibold mb-4">Categories</h4>
-              <div className="space-y-2 text-gray-400">
-                {Object.entries(SUBREDDITS).map(([key, { name }]) => (
-                  <div key={key} className="hover:text-white cursor-pointer transition-colors">
-                    {name}
-                  </div>
-                ))}
-              </div>
-            </div>
-            
-            <div>
-              <h4 className="font-semibold mb-4">Information</h4>
-              <div className="space-y-2 text-gray-400">
-                <div className="hover:text-white cursor-pointer transition-colors">About</div>
-                <div className="hover:text-white cursor-pointer transition-colors">Privacy</div>
-                <div className="hover:text-white cursor-pointer transition-colors">Terms</div>
-                <div className="hover:text-white cursor-pointer transition-colors">Contact</div>
-              </div>
-            </div>
+<footer className="bg-gray-900 dark:bg-gray-800 text-white py-12 border-t dark:border-gray-700">
+  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+      {/* Brand Section */}
+      <div className="md:col-span-2">
+        <div className="flex items-center mb-4">
+          <h3 className="text-2xl font-bold bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
+            GlobalNews
+          </h3>
+        </div>
+        <p className="text-gray-400 text-lg leading-relaxed max-w-md">
+          Your trusted source for real-time news from around the world. 
+          Powered by Reddit communities and updated continuously with the latest global events.
+        </p>
+        <div className="flex space-x-4 mt-6">
+          <div className="w-10 h-10 bg-gray-800 dark:bg-gray-700 rounded-lg flex items-center justify-center hover:bg-blue-600 transition-colors cursor-pointer">
+            <span className="text-sm font-semibold">f</span>
           </div>
-          
-          <div className="border-t border-gray-800 dark:border-gray-700 mt-8 pt-8 text-center text-gray-400">
-            <p>Powered by Reddit API • Real-time global news coverage • Built with React & Express</p>
-            <p className="text-sm mt-2">Backend server running on localhost:4000</p>
+          <div className="w-10 h-10 bg-gray-800 dark:bg-gray-700 rounded-lg flex items-center justify-center hover:bg-blue-400 transition-colors cursor-pointer">
+            <span className="text-sm font-semibold">t</span>
+          </div>
+          <div className="w-10 h-10 bg-gray-800 dark:bg-gray-700 rounded-lg flex items-center justify-center hover:bg-red-600 transition-colors cursor-pointer">
+            <span className="text-sm font-semibold">in</span>
           </div>
         </div>
-      </footer>
+      </div>
+      
+      {/* Categories Section */}
+      <div>
+        <h4 className="font-bold text-lg mb-6 text-white">News Categories</h4>
+        <div className="space-y-3">
+          {Object.entries(SUBREDDITS).map(([key, { name }]) => (
+            <div 
+              key={key} 
+              className="text-gray-400 hover:text-blue-400 cursor-pointer transition-colors duration-200 flex items-center group"
+            >
+              <span className="w-2 h-2 bg-blue-500 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+              {name}
+            </div>
+          ))}
+        </div>
+      </div>
+      
+      {/* Information Section */}
+      <div>
+        <h4 className="font-bold text-lg mb-6 text-white">Information</h4>
+        <div className="space-y-3">
+          <div className="text-gray-400 hover:text-white cursor-pointer transition-colors duration-200 py-1">
+            About Us
+          </div>
+          <div className="text-gray-400 hover:text-white cursor-pointer transition-colors duration-200 py-1">
+            Privacy Policy
+          </div>
+          <div className="text-gray-400 hover:text-white cursor-pointer transition-colors duration-200 py-1">
+            Terms of Service
+          </div>
+          <div className="text-gray-400 hover:text-white cursor-pointer transition-colors duration-200 py-1">
+            Contact Support
+          </div>
+          <div className="text-gray-400 hover:text-white cursor-pointer transition-colors duration-200 py-1">
+            FAQ
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    {/* Bottom Section */}
+    <div className="border-t border-gray-800 dark:border-gray-700 mt-12 pt-8">
+      <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+        <div className="text-gray-400 text-center md:text-left">
+          <p className="flex flex-wrap justify-center md:justify-start items-center gap-2">
+            <span>Powered by Reddit API</span>
+            <span className="hidden md:inline">•</span>
+            <span>Real-time global news coverage</span>
+            <span className="hidden md:inline">•</span>
+            <span>Built with React & Express</span>
+          </p>
+          <p className="text-sm mt-2 flex items-center justify-center md:justify-start">
+            <span className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></span>
+            Backend server running on localhost:4000
+          </p>
+        </div>
+        
+        <div className="text-gray-500 text-sm">
+          © {new Date().getFullYear()} GlobalNews. All rights reserved.
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
     </div>
   )
 }
