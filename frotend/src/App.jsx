@@ -3,23 +3,32 @@ import { NewsGrid } from './components/NewsGrid'
 import { Navigation } from './components/Navigation'
 import { SearchBar } from './components/SearchBar'
 import { LoadingSpinner } from './components/LoadingSpinner'
+import { FeaturedNews } from './components/FeaturedNews'
+import { NewsTicker } from './components/NewsTicker'
+import { CategoryStats } from './components/CategoryStats'
+import { ThemeToggle } from './components/ThemeToggle'
 
 const SUBREDDITS = {
-  world: { name: 'World News', color: 'bg-blue-50', border: 'border-blue-200' },
-  technology: { name: 'Technology', color: 'bg-green-50', border: 'border-green-200' },
-  sports: { name: 'Sports', color: 'bg-red-50', border: 'border-red-200' },
-  science: { name: 'Science', color: 'bg-purple-50', border: 'border-purple-200' },
-  entertainment: { name: 'Entertainment', color: 'bg-yellow-50', border: 'border-yellow-200' },
-  politics: { name: 'Politics', color: 'bg-gray-100', border: 'border-gray-300' },
-  business: { name: 'Business', color: 'bg-indigo-50', border: 'border-indigo-200' },
-  health: { name: 'Health', color: 'bg-emerald-50', border: 'border-emerald-200' }
+  world: { name: 'World News', color: 'bg-blue-50', border: 'border-blue-200', dark: 'dark:bg-blue-900/20' },
+  technology: { name: 'Technology', color: 'bg-green-50', border: 'border-green-200', dark: 'dark:bg-green-900/20' },
+  sports: { name: 'Sports', color: 'bg-red-50', border: 'border-red-200', dark: 'dark:bg-red-900/20' },
+  science: { name: 'Science', color: 'bg-purple-50', border: 'border-purple-200', dark: 'dark:bg-purple-900/20' },
+  entertainment: { name: 'Entertainment', color: 'bg-yellow-50', border: 'border-yellow-200', dark: 'dark:bg-yellow-900/20' },
+  politics: { name: 'Politics', color: 'bg-gray-100', border: 'border-gray-300', dark: 'dark:bg-gray-800' },
+  business: { name: 'Business', color: 'bg-indigo-50', border: 'border-indigo-200', dark: 'dark:bg-indigo-900/20' },
+  health: { name: 'Health', color: 'bg-emerald-50', border: 'border-emerald-200', dark: 'dark:bg-emerald-900/20' }
 }
+
+// Backend API base URL
+const API_BASE_URL = "https://newsapp-agx5.onrender.com/api"
 
 function App() {
   const [activeCategory, setActiveCategory] = useState('world')
   const [news, setNews] = useState([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
+  const [refreshing, setRefreshing] = useState(false)
+  const [error, setError] = useState(null)
 
   useEffect(() => {
     fetchNews(activeCategory)
@@ -27,10 +36,17 @@ function App() {
 
   const fetchNews = async (category) => {
     setLoading(true)
+    setError(null)
     try {
-      const response = await fetch(`https://www.reddit.com/r/${category}/hot.json?limit=20`)
+      const response = await fetch(`${API_BASE_URL}/news/${category}`)
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch news: ${response.status}`)
+      }
+      
       const data = await response.json()
       
+      // Transform the data from your backend
       const posts = data.data.children.map(post => ({
         id: post.data.id,
         title: post.data.title,
@@ -41,32 +57,57 @@ function App() {
         url: `https://reddit.com${post.data.permalink}`,
         image: post.data.thumbnail && post.data.thumbnail.startsWith('http') ? post.data.thumbnail : null,
         domain: post.data.domain,
-        selftext: post.data.selftext
+        selftext: post.data.selftext,
+        upvote_ratio: post.data.upvote_ratio
       }))
       
       setNews(posts)
     } catch (error) {
       console.error('Error fetching news:', error)
+      setError(error.message)
     } finally {
       setLoading(false)
+      setRefreshing(false)
     }
   }
 
+  const handleRefresh = () => {
+    setRefreshing(true)
+    fetchNews(activeCategory)
+  }
+
   const filteredNews = news.filter(post =>
-    post.title.toLowerCase().includes(searchQuery.toLowerCase())
+    post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (post.selftext && post.selftext.toLowerCase().includes(searchQuery.toLowerCase()))
   )
 
+  const currentTheme = SUBREDDITS[activeCategory]
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className={`min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200 ${currentTheme.dark}`}>
       {/* Header */}
-      <header className="bg-white shadow-sm border-b">
+      <header className="bg-white dark:bg-gray-800 shadow-sm border-b dark:border-gray-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <h1 className="text-2xl font-bold text-primary-600">GlobalNews</h1>
-              <span className="ml-2 text-xs bg-primary-100 text-primary-800 px-2 py-1 rounded-full">Live</span>
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center">
+                <h1 className="text-2xl font-bold text-primary-600 dark:text-primary-400">GlobalNews</h1>
+                <span className="ml-2 text-xs bg-primary-100 dark:bg-primary-900 text-primary-800 dark:text-primary-200 px-2 py-1 rounded-full">Live</span>
+              </div>
+              
+              <button
+                onClick={handleRefresh}
+                disabled={refreshing}
+                className="flex items-center space-x-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 px-3 py-2 rounded-lg transition-colors text-sm disabled:opacity-50"
+              >
+                <span>{refreshing ? 'Refreshing...' : 'Refresh'}</span>
+              </button>
             </div>
-            <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+
+            <div className="flex items-center space-x-4">
+              <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+              <ThemeToggle />
+            </div>
           </div>
         </div>
       </header>
@@ -80,31 +121,112 @@ function App() {
       />
 
       {/* Main Content */}
-      <main className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 ${SUBREDDITS[activeCategory].color} min-h-screen`}>
+      <main className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 ${currentTheme.color} ${currentTheme.dark} min-h-screen transition-colors duration-200`}>
+        
+        {/* Error Message */}
+        {error && (
+          <div className="mb-6 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+            <div className="flex items-center">
+              <div className="text-red-600 dark:text-red-400 font-medium">
+                Error loading news: {error}
+              </div>
+              <button
+                onClick={handleRefresh}
+                className="ml-auto bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm"
+              >
+                Retry
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* News Ticker */}
+        <NewsTicker news={news} />
+
+        {/* Category Header */}
         <div className="mb-8">
-          <h2 className="text-3xl font-bold text-gray-900">
-            {SUBREDDITS[activeCategory].name}
-          </h2>
-          <p className="text-gray-600 mt-2">Latest updates and breaking news</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
+                {SUBREDDITS[activeCategory].name}
+              </h2>
+              <p className="text-gray-600 dark:text-gray-400 mt-2">
+                Latest updates and breaking news from around the world
+              </p>
+            </div>
+            <div className="text-sm text-gray-500 dark:text-gray-400">
+              {filteredNews.length} stories • Updated just now
+            </div>
+          </div>
         </div>
 
+        {/* Category Stats */}
+        <CategoryStats news={news} category={activeCategory} />
+
+        {/* Featured News */}
+        {!loading && !searchQuery && !error && (
+          <FeaturedNews news={news} category={activeCategory} />
+        )}
+
+        {/* Loading or News Grid */}
         {loading ? (
           <LoadingSpinner />
+        ) : error ? (
+          <div className="text-center py-12">
+            <div className="text-red-500 text-lg mb-2">Failed to load news</div>
+            <button
+              onClick={handleRefresh}
+              className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg"
+            >
+              Try Again
+            </button>
+          </div>
         ) : (
           <NewsGrid 
             news={filteredNews} 
             category={activeCategory}
-            borderColor={SUBREDDITS[activeCategory].border}
+            borderColor={currentTheme.border}
           />
         )}
       </main>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-8">
+      <footer className="bg-gray-900 dark:bg-gray-800 text-white py-8 border-t dark:border-gray-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <p className="text-gray-400">Powered by Reddit API • Real-time global news coverage</p>
-            <p className="text-gray-500 text-sm mt-2">Updated continuously</p>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div className="md:col-span-2">
+              <h3 className="text-lg font-bold mb-4">GlobalNews</h3>
+              <p className="text-gray-400">
+                Your trusted source for real-time news from around the world. 
+                Powered by Reddit communities and updated continuously.
+              </p>
+            </div>
+            
+            <div>
+              <h4 className="font-semibold mb-4">Categories</h4>
+              <div className="space-y-2 text-gray-400">
+                {Object.entries(SUBREDDITS).map(([key, { name }]) => (
+                  <div key={key} className="hover:text-white cursor-pointer transition-colors">
+                    {name}
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            <div>
+              <h4 className="font-semibold mb-4">Information</h4>
+              <div className="space-y-2 text-gray-400">
+                <div className="hover:text-white cursor-pointer transition-colors">About</div>
+                <div className="hover:text-white cursor-pointer transition-colors">Privacy</div>
+                <div className="hover:text-white cursor-pointer transition-colors">Terms</div>
+                <div className="hover:text-white cursor-pointer transition-colors">Contact</div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="border-t border-gray-800 dark:border-gray-700 mt-8 pt-8 text-center text-gray-400">
+            <p>Powered by Reddit API • Real-time global news coverage • Built with React & Express</p>
+            <p className="text-sm mt-2">Backend server running on localhost:4000</p>
           </div>
         </div>
       </footer>
