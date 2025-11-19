@@ -106,6 +106,9 @@ function App() {
       {/* Navigation */}
       <Navigation 
         categories={Object.keys(SUBREDDITS)} 
+        onSearch={handleSearch}
+  activeCategory={activeCategory}
+  onCategoryChange={setActiveCategory}
         activeCategory={activeCategory}
         setActiveCategory={setActiveCategory}
         subreddits={SUBREDDITS}
