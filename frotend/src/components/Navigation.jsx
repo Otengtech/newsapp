@@ -1,15 +1,29 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Menu, X, Search, Home, TrendingUp } from "lucide-react";
+import { 
+  Menu, 
+  X, 
+  Search, 
+  Home, 
+  TrendingUp,
+  Globe,
+  Laptop,
+  CircleDot,
+  Microscope,
+  Film,
+  Landmark,
+  Briefcase,
+  Heart
+} from "lucide-react";
 
 const categories = [
-  { id: "world", name: "World News", icon: "🌍" },
-  { id: "technology", name: "Technology", icon: "💻" },
-  { id: "sports", name: "Sports", icon: "⚽" },
-  { id: "science", name: "Science", icon: "🔬" },
-  { id: "entertainment", name: "Entertainment", icon: "🎬" },
-  { id: "politics", name: "Politics", icon: "🏛️" },
-  { id: "business", name: "Business", icon: "💼" },
-  { id: "health", name: "Health", icon: "🏥" }
+  { id: "world", name: "World News", icon: Globe },
+  { id: "technology", name: "Technology", icon: Laptop },
+  { id: "sports", name: "Sports", icon: CircleDot },
+  { id: "science", name: "Science", icon: Microscope },
+  { id: "entertainment", name: "Entertainment", icon: Film },
+  { id: "politics", name: "Politics", icon: Landmark },
+  { id: "business", name: "Business", icon: Briefcase },
+  { id: "health", name: "Health", icon: Heart }
 ];
 
 export default function Navigation({ onSearch, activeCategory, onCategoryChange }) {
@@ -150,20 +164,23 @@ export default function Navigation({ onSearch, activeCategory, onCategoryChange 
 
           {/* Desktop Category Bar */}
           <div className="hidden md:flex items-center space-x-1 px-4 sm:px-6 lg:px-8 py-2 bg-gray-50/80 border-t border-gray-100 overflow-x-auto scrollbar-hide">
-            {categories.map((category) => (
-              <button
-                key={category.id}
-                onClick={() => handleCategoryClick(category.id)}
-                className={`flex items-center space-x-2 whitespace-nowrap px-4 py-2 rounded-lg transition-all duration-200 ${
-                  activeCategory === category.id
-                    ? "bg-white text-blue-600 shadow-sm border border-gray-200 font-semibold"
-                    : "text-gray-600 hover:text-blue-600 hover:bg-white/60"
-                }`}
-              >
-                <span className="text-sm">{category.icon}</span>
-                <span className="text-sm font-medium">{category.name}</span>
-              </button>
-            ))}
+            {categories.map((category) => {
+              const IconComponent = category.icon;
+              return (
+                <button
+                  key={category.id}
+                  onClick={() => handleCategoryClick(category.id)}
+                  className={`flex items-center space-x-2 whitespace-nowrap px-4 py-2 rounded-lg transition-all duration-200 ${
+                    activeCategory === category.id
+                      ? "bg-white text-blue-600 shadow-sm border border-gray-200 font-semibold"
+                      : "text-gray-600 hover:text-blue-600 hover:bg-white/60"
+                  }`}
+                >
+                  <IconComponent className="w-4 h-4" />
+                  <span className="text-sm font-medium">{category.name}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
       </nav>
@@ -240,20 +257,23 @@ export default function Navigation({ onSearch, activeCategory, onCategoryChange 
                 </h3>
                 <div className="space-y-1">
                   {filteredCategories.length > 0 ? (
-                    filteredCategories.map((category) => (
-                      <button
-                        key={category.id}
-                        onClick={() => handleCategoryClick(category.id)}
-                        className={`flex items-center space-x-3 p-3 rounded-lg transition-colors w-full text-left ${
-                          activeCategory === category.id
-                            ? "bg-blue-50 text-blue-600 font-semibold"
-                            : "text-gray-700 hover:bg-gray-50"
-                        }`}
-                      >
-                        <span className="text-lg">{category.icon}</span>
-                        <span>{category.name}</span>
-                      </button>
-                    ))
+                    filteredCategories.map((category) => {
+                      const IconComponent = category.icon;
+                      return (
+                        <button
+                          key={category.id}
+                          onClick={() => handleCategoryClick(category.id)}
+                          className={`flex items-center space-x-3 p-3 rounded-lg transition-colors w-full text-left ${
+                            activeCategory === category.id
+                              ? "bg-blue-50 text-blue-600 font-semibold"
+                              : "text-gray-700 hover:bg-gray-50"
+                          }`}
+                        >
+                          <IconComponent className="w-5 h-5" />
+                          <span>{category.name}</span>
+                        </button>
+                      );
+                    })
                   ) : (
                     <div className="text-center py-4 text-gray-500">
                       <Search className="w-8 h-8 mx-auto mb-2 opacity-50" />
@@ -267,17 +287,6 @@ export default function Navigation({ onSearch, activeCategory, onCategoryChange 
           </div>
         </div>
       )}
-
-      {/* Custom Styles */}
-      <style jsx>{`
-        .scrollbar-hide {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-        .scrollbar-hide::-webkit-scrollbar {
-          display: none;
-        }
-      `}</style>
     </>
   );
 }
