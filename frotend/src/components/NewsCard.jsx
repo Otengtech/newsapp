@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { MessageCircle, ArrowUp, ArrowDown, ExternalLink, Calendar, Image as ImageIcon } from 'lucide-react'
 
 export const NewsCard = ({ post, category, borderColor, index }) => {
@@ -6,24 +6,99 @@ export const NewsCard = ({ post, category, borderColor, index }) => {
   const [imageLoading, setImageLoading] = useState(true)
   const [expanded, setExpanded] = useState(false)
   const [hasValidImage, setHasValidImage] = useState(false)
+  const [imageLoaded, setImageLoaded] = useState(false)
+  
+  const imgRef = useRef(null)
+  const observerRef = useRef(null)
 
-  // Check if image is valid and load properly
+  // Enhanced image validation and loading
   useEffect(() => {
-    if (post.image && post.image.startsWith('http')) {
-      const img = new Image()
-      img.src = post.image
-      img.onload = () => {
-        setHasValidImage(true)
-        setImageLoading(false)
-      }
-      img.onerror = () => {
-        setHasValidImage(false)
-        setImageLoading(false)
-        setImageError(true)
-      }
-    } else {
+    if (!post.image || !post.image.startsWith('http')) {
       setHasValidImage(false)
       setImageLoading(false)
+      setImageError(true)
+      return
+    }
+
+    // Clean up previous observer
+    if (observerRef.current) {
+      observerRef.current.disconnect()
+    }
+
+    const img = new Image()
+    img.src = post.image
+    
+    // Set timeout for slow images
+    const loadTimeout = setTimeout(() => {
+      if (!imageLoaded) {
+        setImageError(true)
+        setImageLoading(false)
+      }
+    }, 10000) // 10 second timeout
+
+    img.onload = () => {
+      clearTimeout(loadTimeout)
+      
+      // Additional validation for image dimensions and aspect ratio
+      if (img.naturalWidth < 50 || img.naturalHeight < 50) {
+        setHasValidImage(false)
+        setImageError(true)
+      } else {
+        setHasValidImage(true)
+        setImageError(false)
+      }
+      setImageLoading(false)
+    }
+
+    img.onerror = () => {
+      clearTimeout(loadTimeout)
+      setHasValidImage(false)
+      setImageError(true)
+      setImageLoading(false)
+    }
+
+    return () => {
+      clearTimeout(loadTimeout)
+      if (observerRef.current) {
+        observerRef.current.disconnect()
+      }
+    }
+  }, [post.image, imageLoaded])
+
+  // Intersection Observer for lazy loading
+  useEffect(() => {
+    if (!post.image || !post.image.startsWith('http') || !imgRef.current) return
+
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && imgRef.current) {
+            // Start loading image when it comes into view
+            const img = new Image()
+            img.src = post.image
+            img.onload = () => {
+              setImageLoaded(true)
+              setImageError(false)
+            }
+            img.onerror = () => {
+              setImageError(true)
+            }
+            observerRef.current.disconnect()
+          }
+        })
+      },
+      { 
+        rootMargin: '100px', // Start loading 100px before element comes into view
+        threshold: 0.1 
+      }
+    )
+
+    observerRef.current.observe(imgRef.current)
+
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect()
+      }
     }
   }, [post.image])
 
@@ -61,17 +136,38 @@ export const NewsCard = ({ post, category, borderColor, index }) => {
     return gradients[category] || 'from-primary-50 to-secondary-50'
   }
 
+  // Improved image URL validation
+  const isValidImageUrl = (url) => {
+    if (!url || !url.startsWith('http')) return false
+    
+    // Common image file extensions
+    const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.svg']
+    const urlLower = url.toLowerCase()
+    
+    return imageExtensions.some(ext => urlLower.includes(ext)) || 
+           urlLower.includes('imgur') ||
+           urlLower.includes('redd.it')
+  }
+
+  const shouldShowImage = isValidImageUrl(post.image) && hasValidImage && !imageError
+
   return (
     <div className={`bg-white dark:bg-gray-800 rounded-xl shadow-sm border-2 ${borderColor} hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 flex flex-col h-full`}>
       {/* Image Section */}
-      <div className="relative h-48 overflow-hidden rounded-t-xl flex-shrink-0">
-        {hasValidImage && !imageError ? (
+      <div className="relative h-48 overflow-hidden rounded-t-xl flex-shrink-0" ref={imgRef}>
+        {shouldShowImage ? (
           <>
+            {/* Loading skeleton */}
             {imageLoading && (
-              <div className="absolute inset-0 bg-gray-200 dark:bg-gray-700 animate-pulse flex items-center justify-center">
-                <div className="text-gray-500 dark:text-gray-400">Loading image...</div>
+              <div className="absolute inset-0 bg-gradient-to-r from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 animate-pulse flex items-center justify-center">
+                <div className="flex flex-col items-center">
+                  <div className="w-8 h-8 border-4 border-gray-400 border-t-transparent rounded-full animate-spin mb-2"></div>
+                  <div className="text-gray-500 dark:text-gray-400 text-xs">Loading image...</div>
+                </div>
               </div>
             )}
+            
+            {/* Actual image */}
             <img
               src={post.image}
               alt={post.title}
@@ -79,22 +175,36 @@ export const NewsCard = ({ post, category, borderColor, index }) => {
                 setImageError(true)
                 setImageLoading(false)
               }}
-              onLoad={() => setImageLoading(false)}
-              className={`w-full h-full object-cover transition-transform duration-300 hover:scale-105 ${
-                imageLoading ? 'opacity-0' : 'opacity-100'
-              }`}
+              onLoad={() => {
+                setImageLoading(false)
+                setImageLoaded(true)
+              }}
+              className={`w-full h-full object-cover transition-all duration-500 ${
+                imageLoading ? 'opacity-0 scale-105' : 'opacity-100 scale-100'
+              } hover:scale-105`}
               loading="lazy"
               decoding="async"
+              // Additional attributes for better performance
+              importance="low"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
           </>
         ) : (
+          // Fallback when no image is available
           <div className={`h-full bg-gradient-to-br ${getFallbackGradient()} rounded-t-xl flex flex-col items-center justify-center p-4 text-center`}>
             <ImageIcon className="h-12 w-12 text-gray-400 dark:text-gray-500 mb-3" />
             <div className="text-lg font-bold text-gray-600 dark:text-gray-300 mb-1">GlobalNews</div>
             <div className="text-sm text-gray-500 dark:text-gray-400 uppercase tracking-wide">{category}</div>
-            <div className="text-xs text-gray-400 dark:text-gray-500 mt-2">No image available</div>
+            <div className="text-xs text-gray-400 dark:text-gray-500 mt-2">
+              {imageLoading ? 'Checking for image...' : 'No image available'}
+            </div>
           </div>
         )}
+        
+        {/* Category badge overlay */}
+        <div className="absolute top-3 left-3 bg-black/70 text-white px-2 py-1 rounded-md text-xs font-medium uppercase tracking-wide backdrop-blur-sm">
+          {category}
+        </div>
       </div>
 
       {/* Content Section */}

@@ -212,7 +212,7 @@ export const CategoryStats = ({ news, category }) => {
 
         {/* Most Popular Post - Hero Section */}
         {mostPopular && (
-          <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl shadow-2xl p-6 md:p-8 text-white">
+          <div className="bg-gradient-to-r from-blue-500 hidden md:block to-purple-600 rounded-2xl shadow-2xl p-6 md:p-8 text-white">
             <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-4">

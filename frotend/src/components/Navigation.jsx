@@ -88,10 +88,10 @@ export default function Navigation({ onSearch, activeCategory, onCategoryChange 
 
   return (
     <>
-      <nav className="w-full bg-white shadow-lg sticky top-0 z-50">
+      <nav className="w-full bg-white shadow-lg sticky -top-1 md:top-0 z-50">
         <div className="max-w-7xl mx-auto">
           {/* Top Bar */}
-          <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center my-3 justify-between px-4 sm:px-6 lg:px-8">
             
             {/* Mobile Menu Button */}
             <button
