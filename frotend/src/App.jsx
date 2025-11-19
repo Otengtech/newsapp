@@ -6,6 +6,7 @@ import { LoadingSpinner } from './components/LoadingSpinner'
 import { FeaturedNews } from './components/FeaturedNews'
 import { NewsTicker } from './components/NewsTicker'
 import { CategoryStats } from './components/CategoryStats'
+import ScrollToTop from './components/ScrollToTop'
 
 const SUBREDDITS = {
   world: { name: 'World News', color: 'bg-blue-50', border: 'border-blue-200' },
@@ -90,6 +91,7 @@ function App() {
   return (
     <div className="min-h-screen bg-gray-50 transition-colors duration-200">
       {/* Header */}
+      <ScrollToTop />
       <header className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
