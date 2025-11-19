@@ -29,7 +29,6 @@ const categories = [
 export default function Navigation({ onSearch, activeCategory, onCategoryChange }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchText, setSearchText] = useState("");
-  const [isSearchFocused, setIsSearchFocused] = useState(false);
   const mobileMenuRef = useRef(null);
 
   // Close mobile menu when clicking outside
@@ -89,65 +88,11 @@ export default function Navigation({ onSearch, activeCategory, onCategoryChange 
 
   return (
     <>
-      <nav className="w-full bg-white shadow-lg sticky top-0 z-50 border-b border-gray-100">
+      <nav className="w-full bg-white shadow-lg sticky top-0 z-50">
         <div className="max-w-7xl mx-auto">
           {/* Top Bar */}
-          <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-3">
-            {/* Logo */}
-            <div 
-              className="flex items-center space-x-2 group cursor-pointer"
-              onClick={handleHomeClick}
-            >
-              <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-                <TrendingUp className="w-4 h-4 text-white" />
-              </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                NewsHub
-              </span>
-            </div>
-
-            {/* Desktop Search */}
-            <div className="hidden md:flex flex-1 max-w-md mx-8">
-              <div className={`relative flex-1 transition-all duration-200 ${isSearchFocused ? 'ring-2 ring-blue-500 ring-opacity-50' : ''}`}>
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Search className="h-4 w-4 text-gray-400" />
-                </div>
-                <input
-                  type="text"
-                  placeholder="Search headlines, topics..."
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-xl bg-gray-50 focus:bg-white focus:outline-none transition-colors"
-                  value={searchText}
-                  onChange={(e) => setSearchText(e.target.value)}
-                  onKeyDown={handleSearch}
-                  onFocus={() => setIsSearchFocused(true)}
-                  onBlur={() => setIsSearchFocused(false)}
-                />
-                {searchText && (
-                  <button
-                    onClick={clearSearch}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                  >
-                    <X className="h-4 w-4 text-gray-400 hover:text-gray-600" />
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center space-x-1">
-              <button
-                onClick={handleHomeClick}
-                className={`flex items-center space-x-1 px-4 py-2 rounded-lg transition-colors ${
-                  !activeCategory 
-                    ? "bg-blue-50 text-blue-600 font-semibold" 
-                    : "text-gray-600 hover:text-blue-600 hover:bg-gray-50"
-                }`}
-              >
-                <Home className="w-4 h-4" />
-                <span>Home</span>
-              </button>
-            </div>
-
+          <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8">
+            
             {/* Mobile Menu Button */}
             <button
               className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"

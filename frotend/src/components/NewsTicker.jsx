@@ -22,7 +22,7 @@ export const NewsTicker = ({ news }) => {
     <div className="bg-primary-600 text-white py-3 mb-8 rounded-lg">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center space-x-4">
-          <div className="flex items-center space-x-2 bg-white text-gray-900 px-3 py-1 rounded-full">
+          <div className="flex items-center space-x-2 bg-gray-600 text-gray-100 px-3 py-1 rounded-full">
             <AlertCircle className="h-4 w-4" />
             <span className="font-bold text-sm">BREAKING</span>
           </div>

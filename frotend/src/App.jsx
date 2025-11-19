@@ -102,7 +102,7 @@ function App() {
               <button
                 onClick={handleRefresh}
                 disabled={refreshing}
-                className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center space-x-2 bg-blue-400 hover:bg-blue-300 text-white px-4 py-2 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <span>{refreshing ? 'Refresh...' : 'Refresh'}</span>
                 {refreshing && (
